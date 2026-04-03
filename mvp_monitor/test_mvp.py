@@ -21,6 +21,12 @@ def test_mock_data_get_patient_by_id():
     assert patient is not None
     assert patient["nome"] == "João Silva"
     
+    # Assert vitals structure is present for UI metrics
+    assert "sinais_vitais" in patient["dados_d1"]
+    assert "fc" in patient["dados_d1"]["sinais_vitais"]
+    assert "pa" in patient["dados_d1"]["sinais_vitais"]
+    assert "temp" in patient["dados_d1"]["sinais_vitais"]
+    
     patient_not_found = get_patient_by_id(999)
     assert patient_not_found is None
 

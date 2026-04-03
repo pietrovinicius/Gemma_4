@@ -3,6 +3,12 @@ from mock_data import get_sectors, get_patients_by_sector, get_patient_by_id
 from prompt_engine import build_clinical_prompt
 from llm_client import stream_llm_analysis
 
+STATUS_EMOJI = {
+    "Melhora": "🟢",
+    "Estagnado": "🟡",
+    "Piora": "🔴"
+}
+
 st.set_page_config(page_title="Monitor CTI", page_icon="🏥", layout="wide")
 
 # --- GERENCIAMENTO DE ESTADO (ROTAS) ---
@@ -21,6 +27,29 @@ def go_to(page, **kwargs):
         st.session_state[key] = value
     st.session_state.current_page = page
     st.rerun()
+
+# --- COMPONENTES UI MODULARES ---
+def render_metrics(title, vitals):
+    st.subheader(title)
+    cols = st.columns(4)
+    cols[0].metric("PA (mmHg)", vitals.get("pa", "-"))
+    cols[1].metric("FC (bpm)", vitals.get("fc", "-"))
+    cols[2].metric("Temp (°C)", vitals.get("temp", "-"))
+    cols[3].metric("SpO2 (%)", vitals.get("spo2", "-"))
+
+def render_patient_card(patient):
+    with st.container(border=True):
+        col_nome, col_info, col_status, col_acao = st.columns([3, 2, 2, 2])
+        col_nome.subheader(patient["nome"])
+        col_info.write(f"Idade: {patient['idade']} | {patient['leito']}")
+        
+        status = patient.get("status_anterior", "Estagnado")
+        emoji = STATUS_EMOJI.get(status, "🔵")
+        col_status.write(f"Status Atual: {emoji} **{status}**")
+        
+        with col_acao:
+            if st.button("Analisar Evolução 🧠", key=patient["id"]):
+                go_to("analysis", selected_patient_id=patient["id"])
 
 # --- TELAS DA MVP ---
 def view_login():
@@ -58,14 +87,7 @@ def view_patients():
         return
         
     for p in patients:
-        with st.container(border=True):
-            col_nome, col_info, col_status, col_acao = st.columns([3, 2, 2, 2])
-            col_nome.subheader(p["nome"])
-            col_info.write(f"Idade: {p['idade']} | {p['leito']}")
-            col_status.write(f"Status: **{p['status_anterior']}**")
-            with col_acao:
-                if st.button("Analisar Evolução 🧠", key=p["id"]):
-                    go_to("analysis", selected_patient_id=p["id"])
+        render_patient_card(p)
 
 def view_analysis():
     st.button("⬅️ Retornar aos Pacientes", on_click=lambda: go_to("patients"))
@@ -84,13 +106,13 @@ def view_analysis():
     # Prontuário Lado-a-Lado
     col_d1, col_d0 = st.columns(2)
     with col_d1:
-        st.subheader("DIA -1 (Ontem)")
+        render_metrics("📊 Vitais D-1 (Ontem)", d1["sinais_vitais"])
         st.info(f"**Médica:** {d1['medica']}")
         st.warning(f"**Enfermagem:** {d1['enfermagem']}")
         st.error(f"**Prescrição:** {d1['prescricao']}")
 
     with col_d0:
-        st.subheader("DIA 0 (Hoje)")
+        render_metrics("📊 Vitais D0 (Hoje)", d0["sinais_vitais"])
         st.info(f"**Médica:** {d0['medica']}")
         st.warning(f"**Enfermagem:** {d0['enfermagem']}")
         st.error(f"**Prescrição:** {d0['prescricao']}")
@@ -103,17 +125,23 @@ def view_analysis():
         with st.spinner("Motor IA Analisando prontuário..."):
             prompt = build_clinical_prompt(p)
             
-            # Caixa estilizada onde montaremos o streaming da IA
             response_box = st.empty()
             full_response = ""
             
             for chunk in stream_llm_analysis(prompt):
                 full_response += chunk
-                # Adiciona o cursor piscante "▌" simulando terminal
                 response_box.markdown(f"### Parecer IA \n\n {full_response}▌")
             
-            # Remove o cursor pós-término
-            response_box.success(f"### Parecer Consolidado \n {full_response}")
+            # Post-Process: assign matching visual badge block based on veredict
+            status_badge = ""
+            if "MELHORA" in full_response.upper():
+                status_badge = "🟢 **TENDÊNCIA: MELHORA**"
+            elif "PIORA" in full_response.upper():
+                status_badge = "🔴 **TENDÊNCIA: PIORA**"
+            elif "ESTAGNADO" in full_response.upper():
+                status_badge = "🟡 **TENDÊNCIA: ESTAGNADO**"
+                
+            response_box.success(f"### Parecer Consolidado \n {status_badge} \n\n {full_response}")
 
 # --- ROTEADOR ---
 if not st.session_state.auth_status:
