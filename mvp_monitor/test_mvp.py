@@ -1,0 +1,68 @@
+import pytest
+from unittest.mock import patch, MagicMock
+import json
+
+from mock_data import get_sectors, get_patients_by_sector, get_patient_by_id, get_mock_patients
+from prompt_engine import build_clinical_prompt
+from llm_client import stream_llm_analysis
+
+def test_mock_data_get_sectors():
+    sectors = get_sectors()
+    assert isinstance(sectors, list)
+    assert "CTI Geral" in sectors
+
+def test_mock_data_get_patients_by_sector():
+    patients = get_patients_by_sector("CTI Geral")
+    assert isinstance(patients, list)
+    assert all(p["setor"] == "CTI Geral" for p in patients)
+
+def test_mock_data_get_patient_by_id():
+    patient = get_patient_by_id(1)
+    assert patient is not None
+    assert patient["nome"] == "João Silva"
+    
+    patient_not_found = get_patient_by_id(999)
+    assert patient_not_found is None
+
+def test_prompt_engine_structure():
+    patient = get_patient_by_id(1)
+    prompt = build_clinical_prompt(patient)
+    assert "Evolução Médica" in prompt
+    assert patient['dados_d1']['medica'] in prompt
+    assert patient['dados_d0']['medica'] in prompt
+    assert "MELHORA" in prompt
+    assert "CLASSIFICACAO:" in prompt
+
+@patch("llm_client.requests.post")
+def test_stream_llm_analysis_success(mock_post):
+    mock_response = MagicMock()
+    
+    mock_lines = [
+        json.dumps({"response": "CLASSIFICACAO: "}).encode('utf-8'),
+        json.dumps({"response": "MELHORA\n"}).encode('utf-8'),
+        json.dumps({"response": "JUSTIFICATIVA: "}).encode('utf-8'),
+        json.dumps({"response": "Redução da noradrenalina."}).encode('utf-8')
+    ]
+    mock_response.iter_lines.return_value = mock_lines
+    mock_response.raise_for_status = MagicMock()
+    
+    mock_post.return_value = mock_response
+    
+    prompt = "Teste"
+    result = list(stream_llm_analysis(prompt))
+    
+    assert len(result) == 4
+    assert result[0] == "CLASSIFICACAO: "
+    assert result[1] == "MELHORA\n"
+    mock_post.assert_called_once()
+
+@patch("llm_client.requests.post")
+def test_stream_llm_analysis_exception(mock_post):
+    import requests
+    mock_post.side_effect = requests.exceptions.ConnectionError("Failed to connect")
+    
+    prompt = "Teste"
+    result = list(stream_llm_analysis(prompt))
+    
+    assert len(result) == 1
+    assert "Erro ao conectar" in result[0]

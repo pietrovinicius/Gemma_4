@@ -1,0 +1,26 @@
+Fluxo de **Login -> Setores -> Pacientes -> Análise**, temos dois caminhos principais:
+
+### 1. A Escolha de Tecnologia
+* **Streamlit (Recomendado para o MVP):** É 100% Python. Embora seja mais "estático", as versões recentes já suportam navegação nativa entre páginas e componentes de autenticação. É a forma mais rápida de validar a lógica do Gemma 4 no seu M4 Air.
+* **Next.js + FastAPI (Recomendado para o Produto):** Como você tem a skill `frontend-developer`, esta seria a escolha para um app profissional. O Next.js cuidaria do login e navegação, enquanto uma API em Python (FastAPI) rodaria o Antigravity/Ollama.
+
+**Decisão para o MVP:** Vamos de **Streamlit**. Ele permite focar na inteligência do modelo agora e, se precisar, migramos para Next.js depois usando sua skill de `senior-fullstack`.
+
+---
+
+### 2. O Fluxo do App
+1.  **Página de Login:** Simples (user/pass fixos para o MVP).
+2.  **Dashboard de Setores:** Cards clicáveis (Ex: CTI Adulto, CTI Cardio, Semi-Intensiva).
+3.  **Lista de Pacientes:** Uma tabela filtrada pelo setor escolhido com indicadores visuais básicos (Leito, Nome, Risco).
+4.  **Tela de Análise:** O "coração" do app. Onde o Gemma 4 processa os dados fictícios e exibe a curva de tendência.
+
+---
+
+### 3. Ajuste das Skills para o Desenvolvimento
+Com esse novo foco em interface, o papel das suas skills no Antigravity muda levemente:
+
+* **`python-pro`:** Irá escrever o backend e toda a lógica do Streamlit.
+* **`frontend-developer`:** Irá focar no **design e UX** dentro do Streamlit (CSS customizado, layout dos cards e cores dos alertas de risco).
+* **`clean-code`:** Garantirá que a separação entre a lógica médica e a interface esteja limpa.
+
+---
