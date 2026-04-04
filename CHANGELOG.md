@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-04-03
+### Added
+- **Rastreio Operacional de Alertas Críticos**:
+  - Tabela `historico_analises` evoluída (ALTER TABLE nativo em `init_db`) adicionando coluna de flag `whatsapp_enviado`.
+  - Frontend remodelado no `app.py` com separação de fluxo ("🔗 Abrir WhatsApp Web" e "✅ Registrar Envio Concluído") garantindo isolamento da API nativa de mensageria com o log auditável do sistema.
+  - Tabela de Histórico (DataFrame de baixo nível) interceptando as colunas e inserindo status visuais (`❌ Pendente` \ `✅ Enviado`) automaticamente após chamadas de `st.rerun()`. Teste validado via suíte fechada em `test_whatsapp_tracking`.
+
 ## [0.15.0] - 2026-04-03
 ### Added
 - **Rastreabilidade Dinâmica via WhatsApp**:

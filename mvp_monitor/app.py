@@ -203,7 +203,23 @@ def view_analysis():
             usuario=usuario_logado,
             data=data_analise
         )
-        st.link_button("📲 Notificar Plantonista via WhatsApp", url=wpp_link, type="primary")
+        
+        analise_id_ativa = st.session_state.get(f"last_analise_id_{p['nome']}")
+        registrado = st.session_state.get(f"wpp_enviado_{analise_id_ativa}", False)
+        
+        col_link, col_conf = st.columns(2)
+        with col_link:
+            st.link_button("🔗 1. Abrir WhatsApp Web", url=wpp_link)
+        with col_conf:
+            if not registrado:
+                if st.button("✅ 2. Registrar Envio Concluído", type="primary"):
+                    from database import confirmar_envio_whatsapp
+                    if analise_id_ativa:
+                        confirmar_envio_whatsapp(analise_id_ativa)
+                        st.session_state[f"wpp_enviado_{analise_id_ativa}"] = True
+                        st.rerun()
+            else:
+                st.success("Auditoria Registrada: ✅ Alerta WhatsApp Enviado")
             
     st.divider()
     
@@ -262,9 +278,15 @@ def render_historico_paginado(paciente_nome):
     analises = get_analises_paciente(paciente_nome, limit, offset)
     
     if analises:
+        for reg in analises:
+            if reg.get('tendencia') == 'PIORA':
+                reg['Status Alerta'] = '✅ Enviado' if reg.get('whatsapp_enviado') == 1 else '❌ Pendente'
+            else:
+                reg['Status Alerta'] = '-'
+                
         df = pd.DataFrame(analises)
         # Select clean columns to avoid clutter natively
-        colunas_suportadas = ['id', 'data_hora', 'versao_modelo', 'tendencia', 'justificativa']
+        colunas_suportadas = ['id', 'data_hora', 'versao_modelo', 'tendencia', 'Status Alerta', 'justificativa']
         df_visivel = df[[c for c in colunas_suportadas if c in df.columns]]
         st.dataframe(df_visivel, width="stretch", hide_index=True)
         

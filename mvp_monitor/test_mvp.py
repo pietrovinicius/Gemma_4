@@ -262,4 +262,26 @@ def test_historico_traz_feedback():
     
     conn.close()
 
+def test_whatsapp_tracking():
+    from database import init_db, log_analysis_result, confirmar_envio_whatsapp, get_analises_paciente
+    import sqlite3
+    
+    conn = sqlite3.connect(":memory:")
+    init_db(conn)
+    
+    id1 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P_TESTE_WPP", tendencia="PIORA", justificativa="Ia detecta piora")
+    
+    # Valida estado pendente (0 por default)
+    page_antes = get_analises_paciente("P_TESTE_WPP", 1, 0, conn)
+    assert page_antes[0].get('whatsapp_enviado', 0) == 0
+    
+    # Executa rastreio
+    confirmar_envio_whatsapp(id1, conn=conn)
+    
+    # Valida gravacao final
+    page_depois = get_analises_paciente("P_TESTE_WPP", 1, 0, conn)
+    assert page_depois[0].get('whatsapp_enviado') == 1
+    
+    conn.close()
+
 

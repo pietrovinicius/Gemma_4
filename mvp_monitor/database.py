@@ -33,6 +33,12 @@ def init_db(conn=None):
         except:
             pass # Colunas de feedback já existem
             
+        try:
+            cursor.execute("ALTER TABLE historico_analises ADD COLUMN whatsapp_enviado INTEGER DEFAULT 0")
+        except:
+            pass
+
+            
         conn.commit()
         logger.info("Tabela historico_analises pronta/inicializada no SQLite.")
     except Exception as e:
@@ -151,7 +157,7 @@ def get_analises_paciente(paciente_nome, limit, offset, conn=None):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, data_hora, usuario_solicitante, versao_modelo, tendencia, justificativa, feedback_tipo, feedback_motivo, feedback_data 
+            SELECT id, data_hora, usuario_solicitante, versao_modelo, tendencia, justificativa, feedback_tipo, feedback_motivo, feedback_data, whatsapp_enviado 
             FROM historico_analises 
             WHERE paciente_nome = ?
             ORDER BY id DESC
@@ -185,6 +191,21 @@ def get_ultimas_correcoes(limit=2, conn=None):
     except Exception as e:
         logger.error(f"Erro buscando correções de RLHF SQLite: {str(e)}")
         return []
+    finally:
+        if close_connection:
+            conn.close()
+
+def confirmar_envio_whatsapp(analise_id, conn=None):
+    close_connection = False
+    if conn is None:
+        conn = get_connection()
+        close_connection = True
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE historico_analises SET whatsapp_enviado = 1 WHERE id = ?", (analise_id,))
+        conn.commit()
+    except Exception as e:
+        logger.error(f"Erro confirmando envio de Whatsapp SQLite: {str(e)}")
     finally:
         if close_connection:
             conn.close()
