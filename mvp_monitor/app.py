@@ -238,7 +238,7 @@ def render_historico_paginado(paciente_nome):
     if "pagina_historico" not in st.session_state:
         st.session_state.pagina_historico = 0
     
-    limit = 2
+    limit = 10
     total = count_analises_paciente(paciente_nome)
     
     if total == 0:

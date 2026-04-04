@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-04-03
+### Changed
+- **UX do Histórico**:
+  - Limite de paginação do banco de dados alterado de `2` para `10` linhas por página em `app.py`, aumentando a densidade visual e analítica de retornos. Testes no pipeline parametrizados adequadamente.
+
 ## [0.9.1] - 2026-04-03
 ### Fixed
 - **Bugs Visuais no RLHF**:

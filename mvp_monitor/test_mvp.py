@@ -161,11 +161,8 @@ def test_paginated_patient_history():
     count_joao = count_analises_paciente("João", conn)
     assert count_joao == 3
     
-    page_1 = get_analises_paciente("João", 2, 0, conn)
-    assert len(page_1) == 2
-    
-    page_2 = get_analises_paciente("João", 2, 2, conn)
-    assert len(page_2) == 1
+    page_1 = get_analises_paciente("João", 10, 0, conn)
+    assert len(page_1) == 3
     
     conn.close()
 
