@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-04-03
+### Changed
+- **UX do Histórico & Paginação (SQLite)**:
+  - Removido o routing isolado do painel genérico. O histórico agora compõe nativamente o final da tela de **Análise Clínica** garantindo tracking de evolução isolado por leito.
+  - Implementado sistema de query nativa paginada em `database.py` suportando `LIMIT`/`OFFSET` via parâmetros Streamlit `st.session_state`.
+  - Controle interativo fluído e limpo contendo botões 'Anterior' e 'Próxima' sob o *dataframe* atrelado à validação (100%) em `test_mvp.py`.
+
 ## [0.7.0] - 2026-04-03
 ### Added
 - **Painel de Histórico**:

@@ -56,7 +56,23 @@ def log_analysis_result(usuario, modelo, paciente, tendencia, justificativa, con
         if close_connection:
             conn.close()
 
-def get_todas_analises(conn=None):
+def count_analises_paciente(paciente_nome, conn=None):
+    close_connection = False
+    if conn is None:
+        conn = get_connection()
+        close_connection = True
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(id) FROM historico_analises WHERE paciente_nome = ?", (paciente_nome,))
+        return cursor.fetchone()[0]
+    except Exception as e:
+        logger.error(f"Erro calculando total de análises SQLite: {str(e)}")
+        return 0
+    finally:
+        if close_connection:
+            conn.close()
+
+def get_analises_paciente(paciente_nome, limit, offset, conn=None):
     close_connection = False
     if conn is None:
         conn = get_connection()
@@ -66,14 +82,16 @@ def get_todas_analises(conn=None):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, data_hora, usuario_solicitante, versao_modelo, paciente_nome, tendencia, justificativa 
+            SELECT id, data_hora, usuario_solicitante, versao_modelo, tendencia, justificativa 
             FROM historico_analises 
+            WHERE paciente_nome = ?
             ORDER BY id DESC
-        ''')
+            LIMIT ? OFFSET ?
+        ''', (paciente_nome, limit, offset))
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
     except Exception as e:
-        logger.error(f"Erro efetuando select no banco SQLite: {str(e)}")
+        logger.error(f"Erro efetuando select paginado no banco SQLite: {str(e)}")
         return []
     finally:
         if close_connection:

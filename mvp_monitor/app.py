@@ -73,13 +73,7 @@ def view_login():
                 st.error("Credenciais inválidas.")
 
 def view_sectors():
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.title("🗂️ Seleção de Setores")
-    with col2:
-        if st.button("📚 Ver Histórico", use_container_width=True):
-            go_to("historico")
-            
+    st.title("🗂️ Seleção de Setores")
     sectors = get_sectors()
     cols = st.columns(len(sectors))
     
@@ -189,23 +183,47 @@ def view_analysis():
             from notifications import send_whatsapp_alert
             res = send_whatsapp_alert(p["nome"], p["setor"], "Descompensação clínica sinalizada pela IA")
             st.success(res.get("message", "Notificação enviada com sucesso!"))
+            
+    st.divider()
+    render_historico_paginado(p["nome"])
 
-# --- NOVA VIEW: HISTÓRICO ---
-def view_historico():
-    st.button("⬅️ Retornar aos Setores", on_click=lambda: go_to("sectors"))
-    st.title("📚 Histórico de Análises Salvas")
-    
-    from database import get_todas_analises
+# --- COMPONENTE DE PAGINAÇÃO ---
+def render_historico_paginado(paciente_nome):
+    from database import get_analises_paciente, count_analises_paciente
     import pandas as pd
+    import math
+    st.subheader(f"📚 Histórico Retroativo de Consultas IA")
     
-    analises = get_todas_analises()
+    if "pagina_historico" not in st.session_state:
+        st.session_state.pagina_historico = 0
     
-    if not analises:
-        st.info("Nenhum histórico salvo ainda no banco SQL.")
+    limit = 2
+    total = count_analises_paciente(paciente_nome)
+    
+    if total == 0:
+        st.info("Nenhuma análise prévia para este paciente.")
         return
         
-    df = pd.DataFrame(analises)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    total_pages = math.ceil(total / limit)
+    offset = st.session_state.pagina_historico * limit
+    
+    analises = get_analises_paciente(paciente_nome, limit, offset)
+    
+    if analises:
+        df = pd.DataFrame(analises)
+        st.dataframe(df, use_container_width=True, hide_index=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        if st.button("⬅️ Anterior", disabled=st.session_state.pagina_historico == 0):
+            st.session_state.pagina_historico -= 1
+            st.rerun()
+    with col2:
+        st.write(f"Página {st.session_state.pagina_historico + 1} de {total_pages}")
+    with col3:
+        if st.button("Próxima ➡️", disabled=st.session_state.pagina_historico >= total_pages - 1):
+            st.session_state.pagina_historico += 1
+            st.rerun()
 
 # --- ROTEADOR ---
 if not st.session_state.auth_status:
@@ -216,5 +234,3 @@ elif st.session_state.current_page == "patients":
     view_patients()
 elif st.session_state.current_page == "analysis":
     view_analysis()
-elif st.session_state.current_page == "historico":
-    view_historico()

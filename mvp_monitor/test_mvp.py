@@ -140,28 +140,32 @@ def test_database_creation_and_insertion():
     assert rows[0][5] == "MELHORA"
     conn.close()
 
-def test_get_todas_analises():
-    from database import init_db, log_analysis_result, get_todas_analises
+    # Remove old untested test assert analises[0]["paciente_nome"] == "Teste2"
+def test_paginated_patient_history():
+    from database import init_db, log_analysis_result, get_analises_paciente, count_analises_paciente
     import sqlite3
     
     conn = sqlite3.connect(":memory:")
     init_db(conn)
     
+    for i in range(3):
+        log_analysis_result(
+            conn=conn, usuario="Dr. Pietro", modelo="gemma4", paciente="João",
+            tendencia="MELHORA", justificativa=f"Teste {i}"
+        )
     log_analysis_result(
-        conn=conn, usuario="Dr. Pietro", modelo="gemma4", paciente="Teste1",
-        tendencia="MELHORA", justificativa="Teste dict 1"
-    )
-    log_analysis_result(
-        conn=conn, usuario="Dr. Pietro", modelo="gemma4", paciente="Teste2",
-        tendencia="PIORA", justificativa="Teste dict 2"
+        conn=conn, usuario="Dr. Pietro", modelo="gemma4", paciente="Maria",
+        tendencia="PIORA", justificativa="Teste Maria"
     )
     
-    analises = get_todas_analises(conn)
-    assert len(analises) == 2
-    assert isinstance(analises, list)
-    assert "paciente_nome" in analises[0]
-    assert analises[0]["paciente_nome"] == "Teste2"
-    assert analises[1]["paciente_nome"] == "Teste1"
+    count_joao = count_analises_paciente("João", conn)
+    assert count_joao == 3
+    
+    page_1 = get_analises_paciente("João", 2, 0, conn)
+    assert len(page_1) == 2
+    
+    page_2 = get_analises_paciente("João", 2, 2, conn)
+    assert len(page_2) == 1
     
     conn.close()
 
