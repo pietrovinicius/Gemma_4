@@ -218,4 +218,27 @@ def test_get_melhores_exemplos():
     
     conn.close()
 
+def test_get_ultimas_correcoes():
+    from database import init_db, log_analysis_result, salvar_feedback, get_ultimas_correcoes
+    import sqlite3
+    
+    conn = sqlite3.connect(":memory:")
+    init_db(conn)
+    
+    id1 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P1", tendencia="MELHORA", justificativa="Erro 1")
+    salvar_feedback(id1, "DISLIKE", "Deveria ser PIORA porque X", conn=conn)
+    
+    id2 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P2", tendencia="ESTAGNADO", justificativa="Erro 2")
+    salvar_feedback(id2, "DISLIKE", "", conn=conn)
+    
+    id3 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P3", tendencia="PIORA", justificativa="Erro 3")
+    salvar_feedback(id3, "LIKE", "", conn=conn)
+    
+    correcoes = get_ultimas_correcoes(limit=2, conn=conn)
+    assert len(correcoes) == 1
+    assert correcoes[0]['paciente_nome'] == "P1"
+    assert correcoes[0]['feedback_motivo'] == "Deveria ser PIORA porque X"
+    
+    conn.close()
+
 

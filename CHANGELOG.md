@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-04-03
+### Added
+- **LLM Correction-Aware Prompting (Negative Few-Shot)**:
+  - Base de dados equipada com `get_ultimas_correcoes(limit=2)`, lendo com assertividade os metadados do form de '*DISLIKE*'.
+  - Instruções sistêmicas agora protegem contra falsos positivos: Injetam obrigatoriamente um log "APRENDIZADO POR CORREÇÃO MÉDICA" contendo a tríade de dados (Diagnóstico Inicial x Justificativa Falha x Correção Apontada).
+  - TDD em dia validando isolamento entre tipos de feedbacks e mitigando strings nulas.
+
 ## [0.10.0] - 2026-04-03
 ### Added
 - **LLM Prompting Otimizado (RLHF Fechando o Ciclo)**:

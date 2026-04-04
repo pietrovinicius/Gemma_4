@@ -1,5 +1,5 @@
 def build_clinical_prompt(patient):
-    from database import get_melhores_exemplos
+    from database import get_melhores_exemplos, get_ultimas_correcoes
     from custom_logger import logger
     
     d1 = patient['dados_d1']
@@ -19,6 +19,21 @@ CLASSIFICACAO: {ex['tendencia']}
 JUSTIFICATIVA: {ex['justificativa']}
 """
             
+    correcoes = get_ultimas_correcoes(limit=2)
+    correcoes_str = ""
+    
+    if correcoes:
+        logger.info(f"Otimizando prompt com {len(correcoes)} correcoes médicas baseadas em disliks (Negative Few-Shot)")
+        correcoes_str = "\n\nAPRENDIZADO POR CORREÇÃO MÉDICA:\nAtenção: Em casos anteriores, o corpo médico corrigiu suas falhas. Use as correções abaixo como guia do que NÃO fazer e qual o raciocínio correto esperado:\n"
+        for i, corr in enumerate(correcoes):
+            correcoes_str += f"""
+--- Erro {i+1} ---
+Paciente: {corr['paciente_nome']}
+Assumiu Tendência: {corr['tendencia']}
+Raciocínio Falho: {corr['justificativa']}
+Correção Final do Médico: {corr['feedback_motivo']}
+"""
+
     prompt = f"""Você é um sistema sênior de raciocínio clínico intensivo. Analise a evolução do paciente do Dia-1 para o Dia-0 e classifique a tendência clínica atual.
 
 REGRAS ESTRITAS:
@@ -29,7 +44,7 @@ REGRAS ESTRITAS:
 Referencial Clínico:
 - MELHORA: Redução de Drogas Vasoativas (DVA), extubação/melhora ventilatória, melhora neurológica, hemodinâmica alvo alcançada.
 - ESTAGNADO: Mesmos suportes (doses críticas inalteradas), estabilidade nos parâmetros (nem melhorou para desmame, nem apresentou choque novo).
-- PIORA: Necessidade aumentada de DVA, queda abrupta de consciência, oligúria instalada, febre nova.{exemplos_str}
+- PIORA: Necessidade aumentada de DVA, queda abrupta de consciência, oligúria instalada, febre nova.{exemplos_str}{correcoes_str}
 
 DADOS PACIENTE:
 --- DIA -1 (Ontem) ---

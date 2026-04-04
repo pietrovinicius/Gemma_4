@@ -218,7 +218,7 @@ def view_analysis():
                     
             if st.session_state.get(f"{fb_key}_show_motivo"):
                 with st.form(key=f"form_dislike_{analise_id_ativa}"):
-                    motivo = st.text_area("Descreva tecnicamente o que não atendeu a sua expectativa:")
+                    motivo = st.text_area("Descreva a análise clínica correta para que a IA aprenda com este erro:")
                     if st.form_submit_button("Submeter Crítica", type="primary"):
                         from database import salvar_feedback
                         salvar_feedback(analise_id_ativa, "DISLIKE", motivo)

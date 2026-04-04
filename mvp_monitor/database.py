@@ -160,7 +160,30 @@ def get_analises_paciente(paciente_nome, limit, offset, conn=None):
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
     except Exception as e:
-        logger.error(f"Erro efetuando select paginado no banco SQLite: {str(e)}")
+        logger.error(f"Erro efetuando select de melhores exemplos SQLite: {str(e)}")
+        return []
+    finally:
+        if close_connection:
+            conn.close()
+
+def get_ultimas_correcoes(limit=2, conn=None):
+    close_connection = False
+    if conn is None:
+        conn = get_connection()
+        close_connection = True
+    try:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT paciente_nome, tendencia, justificativa, feedback_motivo
+            FROM historico_analises 
+            WHERE feedback_tipo = 'DISLIKE' AND feedback_motivo IS NOT NULL AND feedback_motivo != ''
+            ORDER BY id DESC
+            LIMIT ?
+        ''', (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+    except Exception as e:
+        logger.error(f"Erro buscando correções de RLHF SQLite: {str(e)}")
         return []
     finally:
         if close_connection:
