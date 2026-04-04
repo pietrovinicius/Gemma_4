@@ -57,9 +57,11 @@ def test_stream_llm_analysis_success(mock_post):
     prompt = "Teste"
     result = list(stream_llm_analysis(prompt))
     
-    assert len(result) == 4
+    assert len(result) == 5
     assert result[0] == "CLASSIFICACAO: "
     assert result[1] == "MELHORA\n"
+    assert isinstance(result[-1], dict)
+    assert "time_taken" in result[-1]
     mock_post.assert_called_once()
 
 @patch("llm_client.requests.post")
@@ -88,4 +90,28 @@ def test_send_whatsapp_alert_success(mock_post):
     assert response["status"] == 200
     assert "sucesso" in response["message"].lower()
     mock_post.assert_called_once()
+
+def test_logger_format_and_file():
+    from custom_logger import get_logger
+    import os
+    import re
+    import time
+    
+    # Log path is at project root
+    log_path = "/Users/pietrodapenhadelima/Projetos/Gemma_4/log.txt"
+    if os.path.exists(log_path):
+        os.remove(log_path)
+    
+    logger = get_logger("TEST_LOGGER")
+    logger.info("Verificando formato estrito de log yyyy/mm/dd")
+    
+    assert os.path.exists(log_path)
+    with open(log_path, "r") as f:
+        content = f.read()
+        
+    # Check "yyyy/mm/dd HH:MM:SS - [INFO] - "
+    match = re.search(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) - \[(INFO)\] - (.*)", content)
+    assert match is not None, "Log did not match the strict format requirement"
+    assert "Verificando formato estrito" in match.group(3)
+
 

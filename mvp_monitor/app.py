@@ -2,6 +2,7 @@ import streamlit as st
 from mock_data import get_sectors, get_patients_by_sector, get_patient_by_id
 from prompt_engine import build_clinical_prompt
 from llm_client import stream_llm_analysis
+from custom_logger import logger
 
 STATUS_EMOJI = {
     "Melhora": "🟢",
@@ -23,6 +24,7 @@ if "selected_patient_id" not in st.session_state:
 
 # --- FUNÇÕES DE NAVEGAÇÃO ---
 def go_to(page, **kwargs):
+    logger.info(f"Navegando para página: {page}")
     for key, value in kwargs.items():
         st.session_state[key] = value
     st.session_state.current_page = page
@@ -60,6 +62,7 @@ def view_login():
         user = st.text_input("Usuário", value="admin")
         pwd = st.text_input("Senha", type="password", value="1234")
         if st.button("Autenticar 🔓", type="primary"):
+            logger.info(f"Tentativa de login com usuário: {user}")
             if user == "admin" and pwd == "1234":
                 go_to("sectors", auth_status=True)
             else:
@@ -127,10 +130,14 @@ def view_analysis():
             
             response_box = st.empty()
             full_response = ""
+            verdict_time = None
             
             for chunk in stream_llm_analysis(prompt):
-                full_response += chunk
-                response_box.markdown(f"### Parecer IA \n\n {full_response}▌")
+                if isinstance(chunk, dict) and "time_taken" in chunk:
+                    verdict_time = chunk["time_taken"]
+                else:
+                    full_response += chunk
+                    response_box.markdown(f"### Parecer IA \n\n {full_response}▌")
             
             # Post-Process: assign matching visual badge block based on veredict
             status_badge = ""
@@ -144,6 +151,9 @@ def view_analysis():
                 status_badge = "🟡 **TENDÊNCIA: ESTAGNADO**"
                 
             response_box.success(f"### Parecer Consolidado \n {status_badge} \n\n {full_response}")
+            
+            if verdict_time is not None:
+                st.caption(f"⏱️ Tempo de Inferência: **{verdict_time:.2f} segundos**")
 
     # Notificação do Plantonista para Piora
     if st.session_state.get("last_veredict_piora", False):

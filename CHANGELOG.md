@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-03
+### Added
+- **Global Logging & Benchmarking**:
+  - `custom_logger.py`: Módulo nativo Python para instanciar logger customizado. Integração de `StreamHandler` e `FileHandler` criando um log unificado na raiz do projeto (`log.txt`).
+  - **Identidade de Log**: Mensagens obrigatoriamente tipificadas e contendo timestamp (`yyyy/mm/dd HH:MM:SS - [NÍVEL] - Mensagem`).
+  - **Inference Benchmark**: O app coleta ativamente o frame inicial e frame final via `time.time()` ao invocar o Gemma_4 no Ollama Localmente, adicionando uma etiqueta com a métrica descritiva do tempo consumido pela transação (`⏱️ Tempo de inferência: X segundos`) renderizado ativamente na UI via Streamlit para auditorias de CTI e melhoria UX.
+
 ## [0.3.2] - 2026-04-03
 ### Fixed
 - **Motor IA & Teste Real**: 
