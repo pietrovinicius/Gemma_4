@@ -102,6 +102,29 @@ def salvar_feedback(analise_id, tipo, motivo, conn=None):
         if close_connection:
             conn.close()
 
+def get_melhores_exemplos(limit=3, conn=None):
+    close_connection = False
+    if conn is None:
+        conn = get_connection()
+        close_connection = True
+    try:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT paciente_nome, tendencia, justificativa 
+            FROM historico_analises 
+            WHERE feedback_tipo = 'LIKE'
+            ORDER BY id DESC
+            LIMIT ?
+        ''', (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+    except Exception as e:
+        logger.error(f"Erro efetuando select de melhores exemplos SQLite: {str(e)}")
+        return []
+    finally:
+        if close_connection:
+            conn.close()
+
 def count_analises_paciente(paciente_nome, conn=None):
     close_connection = False
     if conn is None:

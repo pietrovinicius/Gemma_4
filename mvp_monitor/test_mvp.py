@@ -195,4 +195,27 @@ def test_rlhf_feedback():
     assert tipo == "LIKE"
     conn.close()
 
+def test_get_melhores_exemplos():
+    from database import init_db, log_analysis_result, salvar_feedback, get_melhores_exemplos
+    import sqlite3
+    
+    conn = sqlite3.connect(":memory:")
+    init_db(conn)
+    
+    id1 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P1", tendencia="MELHORA", justificativa="J1")
+    salvar_feedback(id1, "LIKE", "", conn=conn)
+    
+    id2 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P2", tendencia="PIORA", justificativa="J2")
+    salvar_feedback(id2, "DISLIKE", "Ruim", conn=conn)
+    
+    id3 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P3", tendencia="ESTAGNADO", justificativa="J3")
+    salvar_feedback(id3, "LIKE", "", conn=conn)
+    
+    exemplos = get_melhores_exemplos(limit=3, conn=conn)
+    assert len(exemplos) == 2
+    assert exemplos[0]['paciente_nome'] == "P3" 
+    assert exemplos[1]['paciente_nome'] == "P1"
+    
+    conn.close()
+
 

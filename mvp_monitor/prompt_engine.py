@@ -1,7 +1,24 @@
 def build_clinical_prompt(patient):
+    from database import get_melhores_exemplos
+    from custom_logger import logger
+    
     d1 = patient['dados_d1']
     d0 = patient['dados_d0']
     
+    exemplos = get_melhores_exemplos(limit=3)
+    exemplos_str = ""
+    
+    if exemplos:
+        logger.info(f"Otimizando prompt com {len(exemplos)} exemplos aprovados pelo RLHF (Few-Shot)")
+        exemplos_str = "\n\nEXEMPLOS DE ANÁLISES APROVADAS PELO CORPO MÉDICO:\n"
+        for i, ex in enumerate(exemplos):
+            exemplos_str += f"""
+--- Exemplo {i+1} ---
+Paciente: {ex['paciente_nome']}
+CLASSIFICACAO: {ex['tendencia']}
+JUSTIFICATIVA: {ex['justificativa']}
+"""
+            
     prompt = f"""Você é um sistema sênior de raciocínio clínico intensivo. Analise a evolução do paciente do Dia-1 para o Dia-0 e classifique a tendência clínica atual.
 
 REGRAS ESTRITAS:
@@ -12,7 +29,7 @@ REGRAS ESTRITAS:
 Referencial Clínico:
 - MELHORA: Redução de Drogas Vasoativas (DVA), extubação/melhora ventilatória, melhora neurológica, hemodinâmica alvo alcançada.
 - ESTAGNADO: Mesmos suportes (doses críticas inalteradas), estabilidade nos parâmetros (nem melhorou para desmame, nem apresentou choque novo).
-- PIORA: Necessidade aumentada de DVA, queda abrupta de consciência, oligúria instalada, febre nova.
+- PIORA: Necessidade aumentada de DVA, queda abrupta de consciência, oligúria instalada, febre nova.{exemplos_str}
 
 DADOS PACIENTE:
 --- DIA -1 (Ontem) ---

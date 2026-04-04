@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-04-03
+### Added
+- **LLM Prompting Otimizado (RLHF Fechando o Ciclo)**:
+  - Integração total de **Dynamic Few-Shot Prompting**: A engine (`prompt_engine.py`) agora se reconecta no back-end com um smart filter iterativo suportando fallback (`get_melhores_exemplos(limit=3)`).
+  - Antes de qualquer inferência, o app coleta retroativamente as justificativas que o Corpo Clínico ratificou (deu *"LIKE" / 👍 Útil*).
+  - Modelos Injetados: Até 3 exemplos são concatenados no rodapé das instruções Sistêmicas (System Prompt), condicionando a IA a seguir exatamante o padrão que agradou a chefia sem necessidade de Fine-Tuning de rede complexo.
+
 ## [0.9.3] - 2026-04-03
 ### Refactor
 - **Refatoração Streamlit**:
