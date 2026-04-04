@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.1] - 2026-04-03
+### Changed
+- **Automação Combinada UI/UX**:
+  - Transformação do fluxo fragmentado ("Gerar Link" vs "Registrar") em um único botão atômico de Interface: `Disparar Alerta WhatsApp e Selar Registro`.
+  - Processo engatilha assincronamente a marcação da Flag no SQLite `confirmar_envio_whatsapp(analise_id_ativa)` e simultaneamente força a injeção do componente front end custom em JS renderizando a API nativa de WhatsApp.
+  - O DataFrame histórico processa o update vertical instantaneamente garantindo que a Tabela Histórica inferior identifique "Enviado" logo ao redesenhar sem st.reruns abruptos.
+
 ## [0.16.0] - 2026-04-03
 ### Added
 - **Rastreio Operacional de Alertas Críticos**:

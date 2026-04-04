@@ -207,19 +207,23 @@ def view_analysis():
         analise_id_ativa = st.session_state.get(f"last_analise_id_{p['nome']}")
         registrado = st.session_state.get(f"wpp_enviado_{analise_id_ativa}", False)
         
-        col_link, col_conf = st.columns(2)
-        with col_link:
-            st.link_button("🔗 1. Abrir WhatsApp Web", url=wpp_link)
-        with col_conf:
-            if not registrado:
-                if st.button("✅ 2. Registrar Envio Concluído", type="primary"):
-                    from database import confirmar_envio_whatsapp
-                    if analise_id_ativa:
-                        confirmar_envio_whatsapp(analise_id_ativa)
-                        st.session_state[f"wpp_enviado_{analise_id_ativa}"] = True
-                        st.rerun()
-            else:
-                st.success("Auditoria Registrada: ✅ Alerta WhatsApp Enviado")
+        if not registrado:
+            if st.button("📲 Disparar Alerta WhatsApp e Selar Registro", type="primary"):
+                from database import confirmar_envio_whatsapp
+                import streamlit.components.v1 as components
+                
+                if analise_id_ativa:
+                    confirmar_envio_whatsapp(analise_id_ativa)
+                    st.session_state[f"wpp_enviado_{analise_id_ativa}"] = True
+                
+                # Executa js bypass
+                js = f"window.open('{wpp_link}', '_blank');"
+                components.html(f"<script>{js}</script>", height=0)
+                st.success("Auditoria Registrada: ✅ Alerta Disparado. O WhatsApp Web abrirá em instantes.")
+        else:
+            st.success("Auditoria Registrada: ✅ Alerta Disparado e Historico Seguro.")
+            # Fallback for strict browser blockers
+            st.link_button("🔗 Link Manual (Caso Bloqueador de Pop-up)", url=wpp_link)
             
     st.divider()
     
