@@ -82,7 +82,8 @@ def view_sectors():
 
 def view_patients():
     sector = st.session_state.selected_sector
-    st.button("⬅️ Trocar Setor", on_click=lambda: go_to("sectors"))
+    if st.button("⬅️ Trocar Setor"):
+        go_to("sectors")
     
     st.title(f"🛏️ Mapa de Leitos - {sector}")
     patients = get_patients_by_sector(sector)
@@ -98,7 +99,9 @@ def view_patients():
             render_patient_card(p)
 
 def view_analysis():
-    st.button("⬅️ Retornar aos Pacientes", on_click=lambda: go_to("patients"))
+    if st.button("⬅️ Retornar aos Pacientes"):
+        go_to("patients")
+        
     p = get_patient_by_id(st.session_state.selected_patient_id)
     
     if not p:

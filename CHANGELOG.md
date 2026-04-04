@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.1] - 2026-04-03
+### Fixed
+- **Remoção de Avisos 'No-Op' em Ambiente Streamlit**:
+  - Refatoração dos Hooks assíncronos (`on_click=lambda`) nas barras de navegação entre Menus (Pacientes vs Setores) em `app.py`.
+  - Tratamento procedimental de Listeners, blindando o loop against chamadas explícitas de `st.rerun()` injetadas internamente às callbacks. Agora o motor de renderização engole os inputs em top-down natural garantindo interface limpa e reatividade superior nos módulos dinâmicos (como RLHF e Status Tracker).
+
 ## [0.18.0] - 2026-04-03
 ### Added
 - **Escalabilidade Mock Híbrida (8 Leitos | 2 Setores)**:
