@@ -187,12 +187,17 @@ def view_analysis():
              st.caption(f"⏱️ Tempo de Inferência: **{cd['verdict_time']:.2f} segundos**")
 
     # Notificação do Plantonista para Piora
-    if st.session_state.get("last_veredict_piora", False):
+    if st.session_state.get("last_veredict_piora", False) and cache_key in st.session_state:
         st.warning("⚠️ **Alerta:** Riscos de Instabilidade Aguda detectados no raciocínio base.")
-        if st.button("🚨 Notificar Plantonista via WhatsApp", type="secondary"):
-            from notifications import send_whatsapp_alert
-            res = send_whatsapp_alert(p["nome"], p["setor"], "Descompensação clínica sinalizada pela IA")
-            st.success(res.get("message", "Notificação enviada com sucesso!"))
+        from notifications import generate_whatsapp_link
+        
+        cd = st.session_state[cache_key]
+        wpp_link = generate_whatsapp_link(
+            patient_nome=p["nome"],
+            tendencia="PIORA",
+            justificativa=cd['full_response']
+        )
+        st.link_button("📲 Notificar Plantonista via WhatsApp", url=wpp_link, type="primary")
             
     st.divider()
     

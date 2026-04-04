@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-04-03
+### Changed
+- **Integração Real de Gatilhos de Alerta via WhatsApp Web**:
+  - Conversão do simulador estático HTTP para um construtor nativo via `urllib.parse` para montagem dinâmica de links HTTPS da API do WhatsApp.
+  - Na tela de Piora Clínica, o botão genérico Streamlit foi injetado como um `st.link_button`. 
+  - Ao invés de uma chamada falsa, clicar propaga o Plantonista direto para seu App de Mensagens com um template pré-preenchido repassando a TENDÊNCIA, o NOME DO PACIENTE e a JUSTIFICATIVA EXATA elaborada pela IA.
+
 ## [0.12.0] - 2026-04-03
 ### Added
 - **Painel de Confronto de Ideias (Transparência Cognitiva)**:

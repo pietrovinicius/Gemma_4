@@ -75,21 +75,14 @@ def test_stream_llm_analysis_exception(mock_post):
     assert len(result) == 1
     assert "Erro ao conectar" in result[0]
 
-@patch("notifications.requests.post")
-def test_send_whatsapp_alert_success(mock_post):
-    from notifications import send_whatsapp_alert
+def test_generate_whatsapp_link():
+    from notifications import generate_whatsapp_link
+    import urllib.parse
     
-    # Mocking standard WhatsApp API response
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {"status": 200, "message": "Enviado com sucesso"}
-    mock_post.return_value = mock_response
-    
-    response = send_whatsapp_alert("João Silva", "CTI Geral", "Piora aguda detectada")
-    
-    assert response["status"] == 200
-    assert "sucesso" in response["message"].lower()
-    mock_post.assert_called_once()
+    link = generate_whatsapp_link("João", "PIORA", "Muito mal")
+    assert "wa.me/5521998175736" in link
+    assert urllib.parse.quote("João") in link
+    assert urllib.parse.quote("PIORA") in link
 
 def test_logger_format_and_file():
     from custom_logger import get_logger

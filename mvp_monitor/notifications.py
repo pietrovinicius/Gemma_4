@@ -1,19 +1,14 @@
-import requests
+import urllib.parse
 
-def send_whatsapp_alert(patient_nome, sector, urgency_reason):
+def generate_whatsapp_link(patient_nome, tendencia, justificativa):
     """
-    Mock integration for sending WhatsApp API notification.
+    Gera link real do WhatsApp Web com alerta clínico estruturado.
     """
-    url = "http://mock-whatsapp-api.local/v1/messages"
-    payload = {
-        "to": "plantonista_group",
-        "message": f"🚨 ALERTA CRÍTICO: Paciente {patient_nome} ({sector}) com {urgency_reason}."
-    }
+    telefone = "5521998175736"
+    texto = f"""🚨 *ALERTA CRÍTICO CTI*
+Paciente: {patient_nome}
+Tendência: {tendencia}
+Justificativa: {justificativa}"""
     
-    try:
-        response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException:
-        # Mock fallback para funcionar na versão MVP
-        return {"status": 200, "message": "Simulação: Alerta WhatsApp enviado com sucesso ao plantonista."}
+    texto_codificado = urllib.parse.quote(texto)
+    return f"https://wa.me/{telefone}?text={texto_codificado}"
