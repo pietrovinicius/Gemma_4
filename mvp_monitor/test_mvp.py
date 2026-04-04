@@ -79,10 +79,18 @@ def test_generate_whatsapp_link():
     from notifications import generate_whatsapp_link
     import urllib.parse
     
-    link = generate_whatsapp_link("João", "PIORA", "Muito mal")
+    mock_patient = {
+        "nome": "João",
+        "leito": "L01",
+        "dados_d1": {"prescricao": "Noradrenalina 0.5"},
+        "dados_d0": {"prescricao": "Noradrenalina 1.0", "sinais_vitais": {"pa": "120x80", "fc": 80, "spo2": 95, "temp": 36.5}}
+    }
+    
+    link = generate_whatsapp_link(mock_patient, "PIORA", "Muito mal")
     assert "wa.me/5521998175736" in link
     assert urllib.parse.quote("João") in link
     assert urllib.parse.quote("PIORA") in link
+    assert urllib.parse.quote("subiu") in link
 
 def test_logger_format_and_file():
     from custom_logger import get_logger

@@ -193,7 +193,7 @@ def view_analysis():
         
         cd = st.session_state[cache_key]
         wpp_link = generate_whatsapp_link(
-            patient_nome=p["nome"],
+            patient=p,
             tendencia="PIORA",
             justificativa=cd['full_response']
         )

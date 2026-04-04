@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-04-03
+### Refactor
+- **Template Whatsapp de Alta Performance**:
+  - Reformulação do `notifications.py` implementando expressões regulares (`re.search()`) para extrair a Noradrenalina da prescrição médica, mapeando se subiu (⬆️), caiu (⬇️) ou acompanhou (➖) dentro das tramas de texto cru de mock\_data.
+  - O script passa a montar um painel formatado de Plantão resgatando o dict completo de paciente via `kwargs` em `app.py`. A URL incorpora suporte a sinais vitais em linha como PA, FC, Temp e SpO2 com blocos de separador visual para Leitura Rápida durante Intercorrência de CTI.
+
 ## [0.13.0] - 2026-04-03
 ### Changed
 - **Integração Real de Gatilhos de Alerta via WhatsApp Web**:
