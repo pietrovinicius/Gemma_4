@@ -1,0 +1,5 @@
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run mvp_monitor/app.py
+pytest mvp_monitor/test_mvp.py

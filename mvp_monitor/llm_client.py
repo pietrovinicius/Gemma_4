@@ -2,7 +2,7 @@ import requests
 import json
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "gemma4:4b"
+MODEL_NAME = "gemma4:e4b"
 
 def stream_llm_analysis(prompt):
     payload = {

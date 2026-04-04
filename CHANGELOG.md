@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-04-03
+### Fixed
+- **Motor IA & Teste Real**: 
+  - `llm_client.py`: Corrigido erro `404` alterando o nome do modelo apontado de `gemma4:4b` para o target local correto `gemma4:e4b`.
+  - `test_integration.py`: Adicionado teste TDD validando o circuito fechado real de requests streaming no modelo Ollama rodando localmente (resposta efetiva capturada para 'PIORA' paciente 3).
+
 ## [0.3.1] - 2026-04-03
 ### Fixed
 - **Infraestrutura**: Adicionado `requirements.txt` para gestão padronizada de dependências locais (streamlit, requests, pytest). Verificado isolamento de pastas de ambiente virtual (`.venv`, `env`) e `__pycache__` no `.gitignore`.
