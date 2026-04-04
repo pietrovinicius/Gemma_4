@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-04-03
+### Added
+- **Expansão Dinâmica do Tracking de Comunicação**:
+  - Removido o filtro rígido de "Apenas PIORA" na Interface do `app.py`. Agora, independentemente do veredito (Melhora, Estagnado ou Piora), a plataforma oferece um trigger acoplado para notificar via WhatsApp Web com botões adaptativos de UX (vermelho para perigo, cinza para informes tranquilos).
+  - O cabeçalho na URL de `notifications.py` tornou-se inteligente convertendo "ALERTA CRÍTICO" em "BOLETIM DE MELHORA" conforma o status atual do banco.
+  - A lógica unificada atualiza todos os laudos no histórico para ✅ / ❌ ao invés de pular o checklist visual para pacientes estáveis.
+
 ## [0.16.1] - 2026-04-03
 ### Changed
 - **Automação Combinada UI/UX**:

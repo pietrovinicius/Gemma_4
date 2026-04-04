@@ -186,19 +186,34 @@ def view_analysis():
         if cd['verdict_time'] is not None:
              st.caption(f"⏱️ Tempo de Inferência: **{cd['verdict_time']:.2f} segundos**")
 
-    # Notificação do Plantonista para Piora
-    if st.session_state.get("last_veredict_piora", False) and cache_key in st.session_state:
-        st.warning("⚠️ **Alerta:** Riscos de Instabilidade Aguda detectados no raciocínio base.")
+    # Notificação do Plantonista para Todas as Tendências
+    if cache_key in st.session_state:
         from notifications import generate_whatsapp_link
         from datetime import datetime
+        import streamlit.components.v1 as components
         
         cd = st.session_state[cache_key]
+        raw_status = "PIORA" if "PIORA" in cd['status_badge'].upper() else ("MELHORA" if "MELHORA" in cd['status_badge'].upper() else "ESTAGNADO")
+        
+        if raw_status == "PIORA":
+            st.warning("⚠️ **Alerta:** Riscos de Instabilidade Aguda detectados no raciocínio base.")
+            btn_title = "🚨 Disparar Alerta WhatsApp e Selar Registro"
+            btn_type = "primary"
+        elif raw_status == "MELHORA":
+            st.info("✅ **Aviso:** Quadro clínico indica melhora progressiva.")
+            btn_title = "✅ Enviar Informe de Melhora (WhatsApp)"
+            btn_type = "secondary"
+        else:
+            st.info("ℹ️ **Aviso:** Quadro clínico indica estabilidade.")
+            btn_title = "ℹ️ Notificar Plantão (WhatsApp)"
+            btn_type = "secondary"
+            
         usuario_logado = st.session_state.get('usuario', 'Dr. Pietro')
         data_analise = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         
         wpp_link = generate_whatsapp_link(
             patient=p,
-            tendencia="PIORA",
+            tendencia=raw_status,
             justificativa=cd['full_response'],
             usuario=usuario_logado,
             data=data_analise
@@ -208,9 +223,8 @@ def view_analysis():
         registrado = st.session_state.get(f"wpp_enviado_{analise_id_ativa}", False)
         
         if not registrado:
-            if st.button("📲 Disparar Alerta WhatsApp e Selar Registro", type="primary"):
+            if st.button(btn_title, type=btn_type):
                 from database import confirmar_envio_whatsapp
-                import streamlit.components.v1 as components
                 
                 if analise_id_ativa:
                     confirmar_envio_whatsapp(analise_id_ativa)
@@ -219,9 +233,9 @@ def view_analysis():
                 # Executa js bypass
                 js = f"window.open('{wpp_link}', '_blank');"
                 components.html(f"<script>{js}</script>", height=0)
-                st.success("Auditoria Registrada: ✅ Alerta Disparado. O WhatsApp Web abrirá em instantes.")
+                st.success("Auditoria Registrada: ✅ Tratativa Sinalizada. O WhatsApp Web abrirá em instantes.")
         else:
-            st.success("Auditoria Registrada: ✅ Alerta Disparado e Historico Seguro.")
+            st.success("Auditoria Registrada: ✅ Registro Seguro.")
             # Fallback for strict browser blockers
             st.link_button("🔗 Link Manual (Caso Bloqueador de Pop-up)", url=wpp_link)
             
@@ -283,10 +297,7 @@ def render_historico_paginado(paciente_nome):
     
     if analises:
         for reg in analises:
-            if reg.get('tendencia') == 'PIORA':
-                reg['Status Alerta'] = '✅ Enviado' if reg.get('whatsapp_enviado') == 1 else '❌ Pendente'
-            else:
-                reg['Status Alerta'] = '-'
+            reg['Status Alerta'] = '✅ Enviado' if reg.get('whatsapp_enviado') == 1 else '❌ Pendente'
                 
         df = pd.DataFrame(analises)
         # Select clean columns to avoid clutter natively

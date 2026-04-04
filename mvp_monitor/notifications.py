@@ -19,12 +19,15 @@ def generate_whatsapp_link(patient, tendencia, justificativa, usuario="Dr. Pietr
     if "PIORA" in tendencia.upper():
         emoji_trend = "🔴"
         trend_icon = "📉"
+        header = "ALERTA CRÍTICO CTI"
     elif "MELHORA" in tendencia.upper():
         emoji_trend = "🟢"
         trend_icon = "📈"
+        header = "BOLETIM DE MELHORA CLÍNICA"
     else:
         emoji_trend = "🟡"
         trend_icon = "➖"
+        header = "INFORME CLÍNICO CTI"
         
     sinais = patient.get('dados_d0', {}).get('sinais_vitais', {})
     pa = sinais.get('pa', 'N/D')
@@ -47,7 +50,7 @@ def generate_whatsapp_link(patient, tendencia, justificativa, usuario="Dr. Pietr
             nora_status = "➖ manteve"
         nora_line = f"\n- Noradrenalina: {nora_d0} mcg/kg/min ({nora_status})"
         
-    texto = f"""{emoji_trend} *ALERTA CRÍTICO CTI*
+    texto = f"""{emoji_trend} *{header}*
 -----------------------
 *Data:* {data}
 *Solicitante:* {usuario}
