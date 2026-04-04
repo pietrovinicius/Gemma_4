@@ -45,17 +45,15 @@ def render_metrics(title, vitals):
 
 def render_patient_card(patient):
     with st.container(border=True):
-        col_nome, col_info, col_status, col_acao = st.columns([3, 2, 2, 2])
-        col_nome.subheader(patient["nome"])
-        col_info.write(f"Idade: {patient['idade']} | {patient['leito']}")
+        st.subheader(patient["nome"])
+        st.caption(f"{patient['idade']} anos | {patient['leito']}")
         
         status = patient.get("status_anterior", "Estagnado")
         emoji = STATUS_EMOJI.get(status, "🔵")
-        col_status.write(f"Status Atual: {emoji} **{status}**")
+        st.write(f"**Status Atual:** {emoji} {status}")
         
-        with col_acao:
-            if st.button("Analisar Evolução 🧠", key=patient["id"]):
-                go_to("analysis", selected_patient_id=patient["id"])
+        if st.button("Analisar Evolução 🧠", key=patient["id"], use_container_width=True):
+            go_to("analysis", selected_patient_id=patient["id"])
 
 # --- TELAS DA MVP ---
 def view_login():
@@ -93,8 +91,11 @@ def view_patients():
         st.warning("Nenhum paciente neste setor no momento.")
         return
         
-    for p in patients:
-        render_patient_card(p)
+    # Render Mosaic Grid 
+    col_slots = st.columns(2)
+    for i, p in enumerate(patients):
+        with col_slots[i % 2]:
+            render_patient_card(p)
 
 def view_analysis():
     st.button("⬅️ Retornar aos Pacientes", on_click=lambda: go_to("patients"))

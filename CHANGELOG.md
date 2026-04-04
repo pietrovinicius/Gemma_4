@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-04-03
+### Added
+- **Escalabilidade Mock Híbrida (8 Leitos | 2 Setores)**:
+  - Adicionado suporte a estresse de layout na UI (`app.py`), substituindo a renderização linear por uma matriz geométrica dinâmica de colunas (`st.columns(2)`).
+  - Repositório `get_mock_patients()` incrementado de modo coerente (Ontem vs Hoje) para validar saltos inferenciais robustos do *Gemma 4*. 
+  - Perfis incluídos: Pós-op de Cirurgia Cardíaca, Choque Séptico Inicial, Desmame Ventilatório, DPOC Exacerbado e Estabilidade Hemodinâmica pura. Setores formatados para padrão hospitalar ('CTI Geral' e 'UCO').
+
 ## [0.17.1] - 2026-04-03
 ### Fixed
 - **Blindagem de Transmissão UTF-8 via WhatsApp**:
