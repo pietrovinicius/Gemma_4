@@ -79,7 +79,7 @@ def view_sectors():
     
     for i, sec in enumerate(sectors):
         with cols[i]:
-            if st.button(sec, use_container_width=True, key=sec):
+            if st.button(sec, width="stretch", key=sec):
                 go_to("patients", selected_sector=sec)
 
 def view_patients():
@@ -207,13 +207,13 @@ def view_analysis():
         else:
             col_like, col_dislike, col_empty = st.columns([1, 1, 4])
             with col_like:
-                if st.button("👍 Útil", key=f"btn_like_{analise_id_ativa}", use_container_width=True):
+                if st.button("👍 Útil", key=f"btn_like_{analise_id_ativa}", width="stretch"):
                     from database import salvar_feedback
                     salvar_feedback(analise_id_ativa, "LIKE", "")
                     st.session_state[f"{fb_key}_done"] = True
                     st.rerun()
             with col_dislike:
-                if st.button("👎 Precisa Melhorar", key=f"btn_dislike_{analise_id_ativa}", use_container_width=True):
+                if st.button("👎 Precisa Melhorar", key=f"btn_dislike_{analise_id_ativa}", width="stretch"):
                     st.session_state[f"{fb_key}_show_motivo"] = True
                     
             if st.session_state.get(f"{fb_key}_show_motivo"):
@@ -252,7 +252,7 @@ def render_historico_paginado(paciente_nome):
     
     if analises:
         df = pd.DataFrame(analises)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
