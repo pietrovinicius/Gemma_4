@@ -1,4 +1,4 @@
-import urllib.parse
+from urllib.parse import quote
 import re
 
 def extract_nora(text):
@@ -60,5 +60,5 @@ def generate_whatsapp_link(patient, tendencia, justificativa):
 -----------------------
 🔗 Acesse o painel: http://localhost:8501"""
     
-    texto_codificado = urllib.parse.quote(texto)
+    texto_codificado = quote(texto, safe='')
     return f"https://wa.me/{telefone}?text={texto_codificado}"
