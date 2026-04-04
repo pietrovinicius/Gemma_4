@@ -134,14 +134,24 @@ def view_analysis():
             
             # Post-Process: assign matching visual badge block based on veredict
             status_badge = ""
+            st.session_state.last_veredict_piora = False
             if "MELHORA" in full_response.upper():
                 status_badge = "🟢 **TENDÊNCIA: MELHORA**"
             elif "PIORA" in full_response.upper():
                 status_badge = "🔴 **TENDÊNCIA: PIORA**"
+                st.session_state.last_veredict_piora = True
             elif "ESTAGNADO" in full_response.upper():
                 status_badge = "🟡 **TENDÊNCIA: ESTAGNADO**"
                 
             response_box.success(f"### Parecer Consolidado \n {status_badge} \n\n {full_response}")
+
+    # Notificação do Plantonista para Piora
+    if st.session_state.get("last_veredict_piora", False):
+        st.warning("⚠️ **Alerta:** Riscos de Instabilidade Aguda detectados no raciocínio base.")
+        if st.button("🚨 Notificar Plantonista via WhatsApp", type="secondary"):
+            from notifications import send_whatsapp_alert
+            res = send_whatsapp_alert(p["nome"], p["setor"], "Descompensação clínica sinalizada pela IA")
+            st.success(res.get("message", "Notificação enviada com sucesso!"))
 
 # --- ROTEADOR ---
 if not st.session_state.auth_status:
