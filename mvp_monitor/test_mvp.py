@@ -241,4 +241,24 @@ def test_get_ultimas_correcoes():
     
     conn.close()
 
+def test_historico_traz_feedback():
+    from database import init_db, log_analysis_result, salvar_feedback, get_analises_paciente
+    import sqlite3
+    
+    conn = sqlite3.connect(":memory:")
+    init_db(conn)
+    
+    id1 = log_analysis_result(conn=conn, usuario="U", modelo="M", paciente="P_TESTE_UI", tendencia="PIORA", justificativa="Erro IA")
+    salvar_feedback(id1, "DISLIKE", "Deveria ser Melhorar", conn=conn)
+    
+    page = get_analises_paciente("P_TESTE_UI", 10, 0, conn)
+    assert len(page) == 1
+    assert "feedback_tipo" in page[0]
+    assert "feedback_motivo" in page[0]
+    assert "feedback_data" in page[0]
+    assert page[0]['feedback_tipo'] == "DISLIKE"
+    assert page[0]['feedback_motivo'] == "Deveria ser Melhorar"
+    
+    conn.close()
+
 

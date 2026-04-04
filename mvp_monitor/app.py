@@ -252,7 +252,23 @@ def render_historico_paginado(paciente_nome):
     
     if analises:
         df = pd.DataFrame(analises)
-        st.dataframe(df, width="stretch", hide_index=True)
+        # Select clean columns to avoid clutter natively
+        colunas_suportadas = ['id', 'data_hora', 'versao_modelo', 'tendencia', 'justificativa']
+        df_visivel = df[[c for c in colunas_suportadas if c in df.columns]]
+        st.dataframe(df_visivel, width="stretch", hide_index=True)
+        
+        for reg in analises:
+            if reg.get("feedback_tipo") == "DISLIKE":
+                with st.expander("⚠️ Divergência Clínica Detectada (IA vs Médico)"):
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        st.error("🤖 Parecer Original da IA")
+                        st.write(reg.get("justificativa", ""))
+                    with c2:
+                        st.success("👨‍⚕️ Correção do Plantonista")
+                        st.write(reg.get("feedback_motivo", ""))
+                    if reg.get("feedback_data"):
+                        st.caption(f"🗓️ Revisado em {reg['feedback_data']} — Aprendizado assimilado pelo Sistema.")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-04-03
+### Added
+- **Painel de Confronto de Ideias (Transparência Cognitiva)**:
+  - Adicionada lógica visual condicional com DataFrames híbridos em `app.py`. Para cada feedback contendo uma divergência (`DISLIKE`), as tabelas expandem debaixo dos panos o painel lado a lado "⚠️ Divergência Clínica Detectada (IA vs Médico)".
+  - A arquitetura projeta em Vermelho a lógica do erro previsional da Gemma 4, e em Verde a intervenção que o médico submeteu ensinando a engine.
+  - Implementado TDD `test_historico_traz_feedback` chancelando integridade de dados ao trafegar colunas de RLHF até as camadas de Front-End no SQLite.
+
 ## [0.11.0] - 2026-04-03
 ### Added
 - **LLM Correction-Aware Prompting (Negative Few-Shot)**:

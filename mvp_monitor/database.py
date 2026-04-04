@@ -151,7 +151,7 @@ def get_analises_paciente(paciente_nome, limit, offset, conn=None):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, data_hora, usuario_solicitante, versao_modelo, tendencia, justificativa 
+            SELECT id, data_hora, usuario_solicitante, versao_modelo, tendencia, justificativa, feedback_tipo, feedback_motivo, feedback_data 
             FROM historico_analises 
             WHERE paciente_nome = ?
             ORDER BY id DESC
