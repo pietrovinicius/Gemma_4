@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-04-03
+### Fixed
+- **Bugs Visuais no RLHF**:
+  - Corrigido problema gravíssimo de UX onde clicar nos botões de feedback provocava a limpeza de toda a inferência recém processada via Ollama. Resolvido acoplando uma persistência agressiva do `full_response` + `verdict_time` dentro do `st.session_state` nativo com identificador restrito por leito do paciente.
+
 ## [0.9.0] - 2026-04-03
 ### Added
 - **Componente de Feedback RLHF**:

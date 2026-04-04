@@ -128,6 +128,8 @@ def view_analysis():
     
     # LLM Interaction
     st.subheader("🤖 Inferência de Tendência (Gemma 4)")
+    cache_key = f"cache_analise_{p['nome']}"
+    
     if st.button("Processar com IA Local", type="primary"):
         with st.spinner("Motor IA Analisando prontuário..."):
             prompt = build_clinical_prompt(p)
@@ -143,39 +145,46 @@ def view_analysis():
                     full_response += chunk
                     response_box.markdown(f"### Parecer IA \n\n {full_response}▌")
             
+            # Limpa block temporario do stream
+            response_box.empty()
+            
             # Post-Process: assign matching visual badge block based on veredict
             status_badge = ""
             st.session_state.last_veredict_piora = False
+            raw_status = "DESCONHECIDO"
             if "MELHORA" in full_response.upper():
                 status_badge = "🟢 **TENDÊNCIA: MELHORA**"
+                raw_status = "MELHORA"
             elif "PIORA" in full_response.upper():
                 status_badge = "🔴 **TENDÊNCIA: PIORA**"
+                raw_status = "PIORA"
                 st.session_state.last_veredict_piora = True
             elif "ESTAGNADO" in full_response.upper():
                 status_badge = "🟡 **TENDÊNCIA: ESTAGNADO**"
-                
-            response_box.success(f"### Parecer Consolidado \n {status_badge} \n\n {full_response}")
-            
-            if verdict_time is not None:
-                st.caption(f"⏱️ Tempo de Inferência: **{verdict_time:.2f} segundos**")
-                
-                # Save locally to DB 
-                raw_status = "DESCONHECIDO"
-                if "MELHORA" in full_response.upper():
-                    raw_status = "MELHORA"
-                elif "PIORA" in full_response.upper():
-                    raw_status = "PIORA"
-                elif "ESTAGNADO" in full_response.upper():
-                    raw_status = "ESTAGNADO"
+                raw_status = "ESTAGNADO"
                     
-                analise_id = log_analysis_result(
-                    usuario="Dr. Pietro", # mock for phase 1 requirements
-                    modelo="gemma4:e4b",
-                    paciente=p["nome"],
-                    tendencia=raw_status,
-                    justificativa=full_response
-                )
-                st.session_state[f"last_analise_id_{p['nome']}"] = analise_id
+            analise_id = log_analysis_result(
+                usuario="Dr. Pietro", # mock for phase 1 requirements
+                modelo="gemma4:e4b",
+                paciente=p["nome"],
+                tendencia=raw_status,
+                justificativa=full_response
+            )
+            st.session_state[f"last_analise_id_{p['nome']}"] = analise_id
+            
+            logger.info(f"Presistindo estado de sessao ux para analise de {p['nome']}")
+            st.session_state[cache_key] = {
+                "full_response": full_response,
+                "status_badge": status_badge,
+                "verdict_time": verdict_time
+            }
+
+    # -- Renderizacao Persistida da Analise --
+    if cache_key in st.session_state:
+        cd = st.session_state[cache_key]
+        st.success(f"### Parecer Consolidado \n {cd['status_badge']} \n\n {cd['full_response']}")
+        if cd['verdict_time'] is not None:
+             st.caption(f"⏱️ Tempo de Inferência: **{cd['verdict_time']:.2f} segundos**")
 
     # Notificação do Plantonista para Piora
     if st.session_state.get("last_veredict_piora", False):
