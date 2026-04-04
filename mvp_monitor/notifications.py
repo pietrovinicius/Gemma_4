@@ -17,16 +17,16 @@ def generate_whatsapp_link(patient, tendencia, justificativa, usuario="Dr. Pietr
     telefone = "5521998175736"
     
     if "PIORA" in tendencia.upper():
-        emoji_trend = "🔴"
-        trend_icon = "📉"
+        emoji_trend = "\U0001F534"
+        trend_icon = "\U0001F4C9"
         header = "ALERTA CRÍTICO CTI"
     elif "MELHORA" in tendencia.upper():
-        emoji_trend = "🟢"
-        trend_icon = "📈"
+        emoji_trend = "\U0001F7E2"
+        trend_icon = "\U0001F4C8"
         header = "BOLETIM DE MELHORA CLÍNICA"
     else:
-        emoji_trend = "🟡"
-        trend_icon = "➖"
+        emoji_trend = "\U0001F7E1"
+        trend_icon = "\u2796"
         header = "INFORME CLÍNICO CTI"
         
     sinais = patient.get('dados_d0', {}).get('sinais_vitais', {})
@@ -43,11 +43,11 @@ def generate_whatsapp_link(patient, tendencia, justificativa, usuario="Dr. Pietr
     nora_line = ""
     if nora_d0 > 0 or nora_d1 > 0:
         if nora_d0 > nora_d1:
-            nora_status = "⬆️ subiu"
+            nora_status = "\u2B06\uFE0F subiu"
         elif nora_d0 < nora_d1:
-            nora_status = "⬇️ caiu"
+            nora_status = "\u2B07\uFE0F caiu"
         else:
-            nora_status = "➖ manteve"
+            nora_status = "\u2796 manteve"
         nora_line = f"\n- Noradrenalina: {nora_d0} mcg/kg/min ({nora_status})"
         
     texto = f"""{emoji_trend} *{header}*
@@ -63,7 +63,8 @@ def generate_whatsapp_link(patient, tendencia, justificativa, usuario="Dr. Pietr
 -----------------------
 *Justificativa:* {justificativa}
 -----------------------
-🔗 Acesse o painel: http://localhost:8501"""
+\U0001F517 Acesse o painel: http://localhost:8501"""
     
-    texto_codificado = quote(texto, safe='')
-    return f"https://wa.me/{telefone}?text={texto_codificado}"
+    raw_msg = texto
+    encoded_msg = quote(raw_msg.encode('utf-8'), safe='')
+    return f"https://wa.me/{telefone}?text={encoded_msg}"
