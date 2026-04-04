@@ -55,3 +55,26 @@ def log_analysis_result(usuario, modelo, paciente, tendencia, justificativa, con
     finally:
         if close_connection:
             conn.close()
+
+def get_todas_analises(conn=None):
+    close_connection = False
+    if conn is None:
+        conn = get_connection()
+        close_connection = True
+        
+    try:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, data_hora, usuario_solicitante, versao_modelo, paciente_nome, tendencia, justificativa 
+            FROM historico_analises 
+            ORDER BY id DESC
+        ''')
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        logger.error(f"Erro efetuando select no banco SQLite: {str(e)}")
+        return []
+    finally:
+        if close_connection:
+            conn.close()

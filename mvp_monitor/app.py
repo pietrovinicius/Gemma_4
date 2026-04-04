@@ -73,7 +73,13 @@ def view_login():
                 st.error("Credenciais inválidas.")
 
 def view_sectors():
-    st.title("🗂️ Seleção de Setores")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.title("🗂️ Seleção de Setores")
+    with col2:
+        if st.button("📚 Ver Histórico", use_container_width=True):
+            go_to("historico")
+            
     sectors = get_sectors()
     cols = st.columns(len(sectors))
     
@@ -184,6 +190,23 @@ def view_analysis():
             res = send_whatsapp_alert(p["nome"], p["setor"], "Descompensação clínica sinalizada pela IA")
             st.success(res.get("message", "Notificação enviada com sucesso!"))
 
+# --- NOVA VIEW: HISTÓRICO ---
+def view_historico():
+    st.button("⬅️ Retornar aos Setores", on_click=lambda: go_to("sectors"))
+    st.title("📚 Histórico de Análises Salvas")
+    
+    from database import get_todas_analises
+    import pandas as pd
+    
+    analises = get_todas_analises()
+    
+    if not analises:
+        st.info("Nenhum histórico salvo ainda no banco SQL.")
+        return
+        
+    df = pd.DataFrame(analises)
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
 # --- ROTEADOR ---
 if not st.session_state.auth_status:
     view_login()
@@ -193,3 +216,5 @@ elif st.session_state.current_page == "patients":
     view_patients()
 elif st.session_state.current_page == "analysis":
     view_analysis()
+elif st.session_state.current_page == "historico":
+    view_historico()
