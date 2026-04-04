@@ -10,7 +10,7 @@ def extract_nora(text):
             return 0.0
     return 0.0
 
-def generate_whatsapp_link(patient, tendencia, justificativa):
+def generate_whatsapp_link(patient, tendencia, justificativa, usuario="Dr. Pietro", data="N/D"):
     """
     Gera link real do WhatsApp Web com alerta clínico estruturado e painéis comparativos.
     """
@@ -49,6 +49,8 @@ def generate_whatsapp_link(patient, tendencia, justificativa):
         
     texto = f"""{emoji_trend} *ALERTA CRÍTICO CTI*
 -----------------------
+*Data:* {data}
+*Solicitante:* {usuario}
 *Paciente:* {patient.get('nome', 'Desconhecido')} ({patient.get('leito', 'N/D')})
 *Tendência:* {tendencia} {trend_icon}
 -----------------------

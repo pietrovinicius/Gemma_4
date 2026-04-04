@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2026-04-03
+### Added
+- **Rastreabilidade Dinâmica via WhatsApp**:
+  - Incorporada Injeção Dinâmica dos metadados de auditoria. Agora todas as notificações emitidas contam com timestamp e Solicitante no cabeçalho embutidos no corpo do HTTPS, extraídos dos logs ativos e do `session_state`.
+  - Tratamento contínuo de safe parsing garantido contra falsos decodings Unicode em modais externos.
+
 ## [0.14.1] - 2026-04-03
 ### Fixed
 - **Encoding de URL do WhatsApp**:

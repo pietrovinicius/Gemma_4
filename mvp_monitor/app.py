@@ -190,12 +190,18 @@ def view_analysis():
     if st.session_state.get("last_veredict_piora", False) and cache_key in st.session_state:
         st.warning("⚠️ **Alerta:** Riscos de Instabilidade Aguda detectados no raciocínio base.")
         from notifications import generate_whatsapp_link
+        from datetime import datetime
         
         cd = st.session_state[cache_key]
+        usuario_logado = st.session_state.get('usuario', 'Dr. Pietro')
+        data_analise = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        
         wpp_link = generate_whatsapp_link(
             patient=p,
             tendencia="PIORA",
-            justificativa=cd['full_response']
+            justificativa=cd['full_response'],
+            usuario=usuario_logado,
+            data=data_analise
         )
         st.link_button("📲 Notificar Plantonista via WhatsApp", url=wpp_link, type="primary")
             
