@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-04-03
+### Added
+- **Componente de Feedback RLHF**:
+  - Incorporada arquitetura de aprovação clínica (RLHF) em tempo real após as inferências do LLM utilizando as restrições e painéis interativos de UI (`st.columns` e `st.form`).
+  - Banco remodelado on-the-fly (`ALTER TABLE`) via SQLite injetando suporte robusto as métricas: `feedback_tipo`, `feedback_motivo` e `feedback_data`.
+  - API Interna de mitigação em transações: rejeita com segurança tentativas repetitivas do mesmo client/plantonista para a mesma chave de inferência (previsibilidade via `test_mvp.py`).
+
 ## [0.8.0] - 2026-04-03
 ### Changed
 - **UX do Histórico & Paginação (SQLite)**:

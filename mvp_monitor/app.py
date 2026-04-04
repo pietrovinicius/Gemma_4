@@ -168,13 +168,14 @@ def view_analysis():
                 elif "ESTAGNADO" in full_response.upper():
                     raw_status = "ESTAGNADO"
                     
-                log_analysis_result(
+                analise_id = log_analysis_result(
                     usuario="Dr. Pietro", # mock for phase 1 requirements
                     modelo="gemma4:e4b",
                     paciente=p["nome"],
                     tendencia=raw_status,
                     justificativa=full_response
                 )
+                st.session_state[f"last_analise_id_{p['nome']}"] = analise_id
 
     # Notificação do Plantonista para Piora
     if st.session_state.get("last_veredict_piora", False):
@@ -184,6 +185,37 @@ def view_analysis():
             res = send_whatsapp_alert(p["nome"], p["setor"], "Descompensação clínica sinalizada pela IA")
             st.success(res.get("message", "Notificação enviada com sucesso!"))
             
+    st.divider()
+    
+    # Bloco RLHF
+    analise_id_ativa = st.session_state.get(f"last_analise_id_{p['nome']}")
+    if analise_id_ativa:
+        fb_key = f"fb_{analise_id_ativa}"
+        st.subheader("💡 Avalie a Resposta da IA (RLHF)")
+        
+        if st.session_state.get(f"{fb_key}_done"):
+            st.success("Obrigado pelo seu feedback! Ele está nos ajudando a guiar melhores inferências clínicas futuras.")
+        else:
+            col_like, col_dislike, col_empty = st.columns([1, 1, 4])
+            with col_like:
+                if st.button("👍 Útil", key=f"btn_like_{analise_id_ativa}", use_container_width=True):
+                    from database import salvar_feedback
+                    salvar_feedback(analise_id_ativa, "LIKE", "")
+                    st.session_state[f"{fb_key}_done"] = True
+                    st.rerun()
+            with col_dislike:
+                if st.button("👎 Precisa Melhorar", key=f"btn_dislike_{analise_id_ativa}", use_container_width=True):
+                    st.session_state[f"{fb_key}_show_motivo"] = True
+                    
+            if st.session_state.get(f"{fb_key}_show_motivo"):
+                with st.form(key=f"form_dislike_{analise_id_ativa}"):
+                    motivo = st.text_area("Descreva tecnicamente o que não atendeu a sua expectativa:")
+                    if st.form_submit_button("Submeter Crítica", type="primary"):
+                        from database import salvar_feedback
+                        salvar_feedback(analise_id_ativa, "DISLIKE", motivo)
+                        st.session_state[f"{fb_key}_done"] = True
+                        st.rerun()
+                        
     st.divider()
     render_historico_paginado(p["nome"])
 

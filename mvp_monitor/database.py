@@ -26,6 +26,13 @@ def init_db(conn=None):
                 justificativa TEXT NOT NULL
             )
         ''')
+        try:
+            cursor.execute("ALTER TABLE historico_analises ADD COLUMN feedback_tipo TEXT")
+            cursor.execute("ALTER TABLE historico_analises ADD COLUMN feedback_motivo TEXT")
+            cursor.execute("ALTER TABLE historico_analises ADD COLUMN feedback_data TEXT")
+        except:
+            pass # Colunas de feedback já existem
+            
         conn.commit()
         logger.info("Tabela historico_analises pronta/inicializada no SQLite.")
     except Exception as e:
@@ -48,10 +55,49 @@ def log_analysis_result(usuario, modelo, paciente, tendencia, justificativa, con
             (data_hora, usuario_solicitante, versao_modelo, paciente_nome, tendencia, justificativa) 
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (data_hora, usuario, modelo, paciente, tendencia, justificativa))
+        inserted_id = cursor.lastrowid
         conn.commit()
         logger.info(f"Persistência SQL relizada para paciente {paciente} (Veredito: {tendencia}).")
+        return inserted_id
     except Exception as e:
         logger.error(f"Erro persistindo análise no banco SQLite: {str(e)}")
+        return None
+    finally:
+        if close_connection:
+            conn.close()
+
+def salvar_feedback(analise_id, tipo, motivo, conn=None):
+    close_connection = False
+    if conn is None:
+        conn = get_connection()
+        close_connection = True
+        
+    try:
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT feedback_tipo FROM historico_analises WHERE id = ?", (analise_id,))
+        row = cursor.fetchone()
+        
+        if row is None:
+            return False
+            
+        if row[0] is not None:
+            logger.warning(f"Tentativa de duplicar feedback para análise ID {analise_id} mitigada.")
+            return False
+            
+        feedback_data = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        cursor.execute('''
+            UPDATE historico_analises 
+            SET feedback_tipo = ?, feedback_motivo = ?, feedback_data = ?
+            WHERE id = ?
+        ''', (tipo, motivo, feedback_data, analise_id))
+        
+        conn.commit()
+        logger.info(f"Feedback recebido para análise ID {analise_id}: {tipo} - Motivo: {motivo}")
+        return True
+    except Exception as e:
+        logger.error(f"Erro salvando feedback (RLHF): {str(e)}")
+        return False
     finally:
         if close_connection:
             conn.close()

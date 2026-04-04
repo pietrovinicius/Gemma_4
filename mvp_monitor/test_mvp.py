@@ -169,4 +169,33 @@ def test_paginated_patient_history():
     
     conn.close()
 
+def test_rlhf_feedback():
+    from database import init_db, log_analysis_result, salvar_feedback
+    import sqlite3
+    
+    conn = sqlite3.connect(":memory:")
+    init_db(conn)
+    
+    analise_id = log_analysis_result(
+        conn=conn, usuario="Dr. Pietro", modelo="gemma4", paciente="João",
+        tendencia="MELHORA", justificativa="Teste RLHF"
+    )
+    
+    assert analise_id is not None
+    
+    # Primeiro envio aceito
+    success = salvar_feedback(analise_id, "LIKE", "", conn=conn)
+    assert success is True
+    
+    # Envio duplo mitigado
+    success_dup = salvar_feedback(analise_id, "DISLIKE", "Erro posterior", conn=conn)
+    assert success_dup is False
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT feedback_tipo FROM historico_analises WHERE id = ?", (analise_id,))
+    tipo = cursor.fetchone()[0]
+    
+    assert tipo == "LIKE"
+    conn.close()
+
 
