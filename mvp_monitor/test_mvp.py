@@ -114,4 +114,30 @@ def test_logger_format_and_file():
     assert match is not None, "Log did not match the strict format requirement"
     assert "Verificando formato estrito" in match.group(3)
 
+def test_database_creation_and_insertion():
+    from database import get_connection, init_db, log_analysis_result
+    import sqlite3
+    
+    conn = sqlite3.connect(":memory:")
+    init_db(conn)
+    
+    log_analysis_result(
+        conn=conn,
+        usuario="Dr. Pietro",
+        modelo="gemma4:e4b",
+        paciente="João Silva",
+        tendencia="MELHORA",
+        justificativa="Redução de aminas..."
+    )
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM historico_analises")
+    rows = cursor.fetchall()
+    
+    assert len(rows) == 1
+    assert rows[0][2] == "Dr. Pietro"
+    assert rows[0][4] == "João Silva"
+    assert rows[0][5] == "MELHORA"
+    conn.close()
+
 

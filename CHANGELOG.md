@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-04-03
+### Added
+- **Persistência de Dados (SQLite)**:
+  - `database.py`: Módulo implementado usando `sqlite3` nativo que gerencia a tabela `historico_analises` no arquivo `monitor.db` (acoplado com auditoria via log).
+  - Integrado diretamente no fluxo do `app.py`: após calcular o Benchmark do Ollama, todos os dados clínicos de inferência gerados (Paciente, Tendência, Time e Justificativa, sob perfil mockado 'Dr. Pietro') são agora gravados com rigor no banco com formato timestamp `yyyy/mm/dd HH:MM:SS`. Todas as operações sobem para o `log.txt` global. Coberto 100% via memória (`:memory:`) por `pytest`.
+
 ## [0.4.0] - 2026-04-03
 ### Added
 - **Global Logging & Benchmarking**:

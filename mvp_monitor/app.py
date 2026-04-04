@@ -3,6 +3,10 @@ from mock_data import get_sectors, get_patients_by_sector, get_patient_by_id
 from prompt_engine import build_clinical_prompt
 from llm_client import stream_llm_analysis
 from custom_logger import logger
+from database import init_db, log_analysis_result
+
+# Inicializa schema do BD e arquivo .db
+init_db()
 
 STATUS_EMOJI = {
     "Melhora": "🟢",
@@ -154,6 +158,23 @@ def view_analysis():
             
             if verdict_time is not None:
                 st.caption(f"⏱️ Tempo de Inferência: **{verdict_time:.2f} segundos**")
+                
+                # Save locally to DB 
+                raw_status = "DESCONHECIDO"
+                if "MELHORA" in full_response.upper():
+                    raw_status = "MELHORA"
+                elif "PIORA" in full_response.upper():
+                    raw_status = "PIORA"
+                elif "ESTAGNADO" in full_response.upper():
+                    raw_status = "ESTAGNADO"
+                    
+                log_analysis_result(
+                    usuario="Dr. Pietro", # mock for phase 1 requirements
+                    modelo="gemma4:e4b",
+                    paciente=p["nome"],
+                    tendencia=raw_status,
+                    justificativa=full_response
+                )
 
     # Notificação do Plantonista para Piora
     if st.session_state.get("last_veredict_piora", False):
